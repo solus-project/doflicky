@@ -18,11 +18,10 @@ Is:
 
 
 Author
-======
+------
 
  - Ikey Doherty
 
 License
-=======
-
+------
 GPL-2.0, see `LICENSE` for details
