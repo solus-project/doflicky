@@ -119,15 +119,19 @@ closed source code."""
             box = Gtk.HBox(0)
             box.pack_start(img, False, False, 0)
 
-            lab = Gtk.Label("<big>%s</big> - <small>%s</small>" % (meta.package.summary, meta.package.version))
+            hasPkg = self.installdb.has_package(pkg)
+            suffix = " [installed]" if hasPkg else ""
+
+            lab = Gtk.Label("<big>%s</big> - <small>%s%s</small>" % (meta.package.summary, meta.package.version, suffix))
             lab.set_margin_start(12)
             lab.set_use_markup(True)
             box.pack_start(lab, False, True, 0)
             box.show_all()
             self.listbox.add(box)
 
-            if self.installdb.has_package(pkg):
+            if hasPkg:
                 setattr(lab, "ipackage", self.installdb.get_package(pkg))
+                lab.get_style_context().add_class("dim-label")
 
         return False
 
