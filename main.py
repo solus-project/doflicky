@@ -10,6 +10,9 @@
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 #
+import sys
+sys.path.append("/usr/share/doflicky")
+
 from gi.repository import Gtk, GLib, Gdk, GObject, Gio
 from doflicky import detection
 from doflicky.ui import OpPage, CompletionPage

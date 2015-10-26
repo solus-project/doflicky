@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Hardware Drivers
+GenericName=Hardware Drivers
+Comment=Install or remove hardware drivers
+Exec=/usr/bin/doflicky
+Terminal=false
+Type=Application
+StartupNotify=false
+Icon=cs-cat-hardware
+Categories=GNOME;GTK;System;PackageManager;
+Keywords=Driver;GPU;Hardware;Preferences;Install;Uninstall;Program;Software;App;Store;
