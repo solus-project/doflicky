@@ -10,13 +10,14 @@
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 #
-from gi.repository import Gtk, GLib, Gdk, GObject
+from gi.repository import Gtk, GLib, Gdk, GObject, Gio
 from doflicky import detection
 import pisi.api
 from threading import Thread
 from pisi.db.installdb import InstallDB
+import sys
 
-class DoFlicky(Gtk.Window):
+class DoFlickyWindow(Gtk.ApplicationWindow):
 
     listbox = None
     installdb = None
@@ -24,8 +25,7 @@ class DoFlicky(Gtk.Window):
     removebtn = None
 
     def __init__(self):
-        Gtk.Window.__init__(self)
-        self.connect('destroy', Gtk.main_quit)
+        Gtk.ApplicationWindow.__init__(self)
 
         hbar = Gtk.HeaderBar()
         hbar.set_show_close_button(True)
@@ -104,8 +104,6 @@ closed source code."""
         self.set_position(Gtk.WindowPosition.CENTER)
         self.show_all()
 
-        self.refresh()
-
 
     def row_handler(self, box, row):
         """ Ensure we only enable the correct buttons """
@@ -166,9 +164,28 @@ closed source code."""
 
         if len(pkgs) == 0:
             GObject.idle_add(lambda: self.rs.set_markup("<b>No drivers were found for your system</b>"))
-            
+
+class DoFlicky(Gtk.Application):
+
+    app_win = None
+
+    def __init__(self):
+        Gtk.Application.__init__(self, application_id="com.solus_project.DoFlicky", flags=Gio.ApplicationFlags.FLAGS_NONE)
+
+        self.connect('activate', self.on_activate)
+
+    def on_activate(self, app):
+        if self.app_win is not None:
+            self.app_win.present()
+            return
+        self.app_win = DoFlickyWindow()
+        app.add_window(self.app_win)
+        self.app_win.present()
+        self.app_win.show_all()
+        self.app_win.refresh()
+
 if __name__ == "__main__":
     GLib.threads_init()
     Gdk.threads_init()
-    DoFlicky()
-    Gtk.main()
+    app = DoFlicky()
+    app.run(sys.argv)
