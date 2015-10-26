@@ -11,6 +11,8 @@
 #  (at your option) any later version.
 #
 from gi.repository import Gtk
+from doflicky import detection
+import pisi.api
 
 class DoFlicky(Gtk.Window):
 
@@ -65,6 +67,7 @@ closed source code."""
         toolbar.add(btn)
 
         btn = Gtk.ToolButton.new(None, "Install")
+        btn.set_sensitive(False)
         btn.set_property("icon-name", "list-add-symbolic")
         btn.set_is_important(True)
         toolbar.add(btn)
@@ -83,9 +86,23 @@ closed source code."""
         listbox.set_placeholder(rs)
 
         self.listbox = listbox
+        self.detect_drivers()
 
         self.show_all()
 
+    def detect_drivers(self):
+        for child in self.listbox.get_children():
+            child.destroy()
+
+        pkgs = detection.detect_hardware_packages()
+        for pkg in pkgs:
+            meta,files = pisi.api.info(pkg)
+
+            lab = Gtk.Label("%s - %s-%s" % (meta.package.name, meta.package.version, meta.package.release))
+            lab.show_all()
+            self.listbox.add(lab)
+
+            
 if __name__ == "__main__":
     DoFlicky()
     Gtk.main()
