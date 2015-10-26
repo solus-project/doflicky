@@ -20,6 +20,8 @@ class DoFlicky(Gtk.Window):
 
     listbox = None
     installdb = None
+    installbtn = None
+    removebtn = None
 
     def __init__(self):
         Gtk.Window.__init__(self)
@@ -65,12 +67,14 @@ closed source code."""
         toolbar.add(sep)
 
         btn = Gtk.ToolButton.new(None, "Remove")
+        self.removebtn = btn
         btn.set_sensitive(False)
         btn.set_property("icon-name", "list-remove-symbolic")
         btn.set_is_important(True)
         toolbar.add(btn)
 
         btn = Gtk.ToolButton.new(None, "Install")
+        self.installbtn = btn
         btn.set_sensitive(False)
         btn.set_property("icon-name", "list-add-symbolic")
         btn.set_is_important(True)
@@ -94,12 +98,25 @@ closed source code."""
         listbox.set_placeholder(self.rs)
 
         self.listbox = listbox
+        self.listbox.connect("row-selected", self.row_handler)
 
         self.set_position(Gtk.WindowPosition.CENTER)
         self.show_all()
 
         self.refresh()
 
+
+    def row_handler(self, box, row):
+        """ Ensure we only enable the correct buttons """
+        if not row:
+            self.installbtn.set_sensitive(False)
+            self.removebtn.set_sensitive(False)
+            return
+        child = row.get_child()
+
+        installed = hasattr(child, 'ipackage')
+        self.installbtn.set_sensitive(not installed)
+        self.removebtn.set_sensitive(installed)
 
     def refresh(self):
         t = Thread(target=self.detect_drivers)
@@ -130,7 +147,7 @@ closed source code."""
             self.listbox.add(box)
 
             if hasPkg:
-                setattr(lab, "ipackage", self.installdb.get_package(pkg))
+                setattr(box, "ipackage", self.installdb.get_package(pkg))
                 lab.get_style_context().add_class("dim-label")
 
         return False
