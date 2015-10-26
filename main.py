@@ -10,9 +10,10 @@
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 #
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib, Gdk, GObject
 from doflicky import detection
 import pisi.api
+from threading import Thread
 
 class DoFlicky(Gtk.Window):
 
@@ -79,16 +80,33 @@ closed source code."""
         mlayout.pack_start(listbox, True, False, 3)
 
         # reserved widget
-        rs = Gtk.Label("<b>No drivers were found for your system</b>")
-        rs.show_all()
-        rs.set_use_markup(True)
+        self.rs = Gtk.Label("<b>Searching for available drivers</b>")
+        self.rs.show_all()
+        self.rs.set_use_markup(True)
 
-        listbox.set_placeholder(rs)
+        listbox.set_placeholder(self.rs)
 
         self.listbox = listbox
-        self.detect_drivers()
 
+        self.set_position(Gtk.WindowPosition.CENTER)
         self.show_all()
+
+        self.refresh()
+
+
+    def refresh(self):
+        t = Thread(target=self.detect_drivers)
+        t.start()
+
+    def add_pkg(self, pkg):
+        meta,files = pisi.api.info(pkg)
+
+        lab = Gtk.Label("%s - %s-%s" % (meta.package.name, meta.package.version, meta.package.release))
+        lab.show_all()
+        self.listbox.add(lab)
+
+        return False
+
 
     def detect_drivers(self):
         for child in self.listbox.get_children():
@@ -96,13 +114,14 @@ closed source code."""
 
         pkgs = detection.detect_hardware_packages()
         for pkg in pkgs:
-            meta,files = pisi.api.info(pkg)
 
-            lab = Gtk.Label("%s - %s-%s" % (meta.package.name, meta.package.version, meta.package.release))
-            lab.show_all()
-            self.listbox.add(lab)
+            GObject.idle_add(lambda: self.add_pkg(pkg))
 
+        if len(pkgs) == 0:
+            GObject.idle_add(lambda: self.rs.set_markup("<b>No drivers were found for your system</b>"))
             
 if __name__ == "__main__":
+    GLib.threads_init()
+    Gdk.threads_init()
     DoFlicky()
     Gtk.main()
