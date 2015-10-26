@@ -18,6 +18,7 @@ import pisi.db
 from pisi.operations.install import plan_install_pkg_names
 from pisi.operations.remove import plan_remove
 from pisi.operations.upgrade import plan_upgrade
+import dbus
 
 class CompletionPage(Gtk.VBox):
 
@@ -33,8 +34,10 @@ class CompletionPage(Gtk.VBox):
         self.btn = Gtk.Button("Restart")
         self.btn.set_hexpand(False)
         self.btn.set_halign(Gtk.Align.CENTER)
+
         self.pack_start(self.btn, False, False, 4)
 
+        self.btn.connect('clicked', self.reboot)
         self.set_cancelled(False)
 
     def set_cancelled(self, c=False):
@@ -44,6 +47,15 @@ class CompletionPage(Gtk.VBox):
             self.lab.set_markup("<big>User cancelled operation, please just close this window</big>")
         else:
             self.lab.set_markup("<big>Please restart your device to complete system configuration</big>")
+
+    def reboot(self, btn, udata=None):
+        try:
+            bus = dbus.SystemBus()
+            rskel = bus.get_object('org.freedesktop.login1', '/org/freedesktop/login1')
+            iface = dbus.Interface(rskel, 'org.freedesktop.login1.Manager')
+            iface.Reboot(True)
+        except Exception, ex:
+            print("Exception rebooting: %s" % ex)
 
 class OpPage(Gtk.VBox):
 
