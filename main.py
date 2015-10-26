@@ -37,6 +37,7 @@ class DoFlicky(Gtk.Window):
         self.set_size_request(400, 400)
 
         mlayout = Gtk.VBox(0)
+        self.layout = mlayout
         self.add(mlayout)
 
         layout = Gtk.HBox(0)
@@ -119,6 +120,7 @@ closed source code."""
         self.removebtn.set_sensitive(installed)
 
     def refresh(self):
+        self.layout.set_sensitive(False)
         t = Thread(target=self.detect_drivers)
         t.start()
 
@@ -150,6 +152,7 @@ closed source code."""
                 setattr(box, "ipackage", self.installdb.get_package(pkg))
                 lab.get_style_context().add_class("dim-label")
 
+        self.layout.set_sensitive(True)
         return False
 
     def detect_drivers(self):
