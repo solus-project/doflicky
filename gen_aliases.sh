@@ -59,7 +59,7 @@ for pkg in ${pkgs[*]} ; do
     fi
 
     for alias in ${aliases[*]} ; do
-        echo "alias ${alias} ${modulen} ${pkg}" >> "${ADIR}/${pkg}.modalias"
+        echo "alias ${alias} ${modulen} ${pkg}" >> "${ADIR}/${pkg}.modaliases"
     done
 
     popd >/dev/null
