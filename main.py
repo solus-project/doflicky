@@ -100,6 +100,7 @@ closed source code."""
 
         listbox = Gtk.ListBox()
         scl = Gtk.ScrolledWindow(None, None)
+        scl.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
         scl.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
         scl.add(listbox)
 
