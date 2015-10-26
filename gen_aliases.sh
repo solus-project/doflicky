@@ -6,9 +6,8 @@ function do_fail()
     exit 1
 }
 
-# Our known providers, note its complete bullshit for nvidia drivers right
-# now, we'll need to use the objdump method
-pkgs=( nvidia-glx-driver nvidia-304-glx-driver broadcom-sta )
+# non-gpu packages behave.
+pkgs=(  broadcom-sta )
 
 WDIR="$(realpath ./work)"
 ADIR="$(realpath ./aliases)"
@@ -38,7 +37,10 @@ for pkg in ${pkgs[*]} ; do
     unpisi *.eopkg >/dev/null|| do_fail "Unable to extract eopkg"
 
     aliases=()
+    modulen=""
     for module in `find install -name "*.ko"` ; do
+        modulen="$(basename ${module})"
+        modulen="${modulen%.*}"
         echo "Analysing ${module}"
         while read line ; do
             key="$(echo ${line}|awk -F : '{print $1}')"
@@ -57,7 +59,7 @@ for pkg in ${pkgs[*]} ; do
     fi
 
     for alias in ${aliases[*]} ; do
-        echo "${alias}" >> "${ADIR}/${pkg}.modalias"
+        echo "alias ${alias} ${modulen} ${pkg}" >> "${ADIR}/${pkg}.modalias"
     done
 
     popd >/dev/null
