@@ -14,10 +14,12 @@ from gi.repository import Gtk, GLib, Gdk, GObject
 from doflicky import detection
 import pisi.api
 from threading import Thread
+from pisi.db.installdb import InstallDB
 
 class DoFlicky(Gtk.Window):
 
     listbox = None
+    installdb = None
 
     def __init__(self):
         Gtk.Window.__init__(self)
@@ -98,24 +100,27 @@ closed source code."""
         t = Thread(target=self.detect_drivers)
         t.start()
 
-    def add_pkg(self, pkg):
-        meta,files = pisi.api.info(pkg)
+    def add_pkgs(self, pkgs):
+        for pkg in pkgs:
+            meta,files = pisi.api.info(pkg)
 
-        lab = Gtk.Label("%s - %s-%s" % (meta.package.name, meta.package.version, meta.package.release))
-        lab.show_all()
-        self.listbox.add(lab)
+            lab = Gtk.Label("%s - %s-%s" % (meta.package.name, meta.package.version, meta.package.release))
+            lab.show_all()
+            self.listbox.add(lab)
+
+            if self.installdb.has_package(pkg):
+                setattr(lab, "ipackage", self.installdb.get_package(pkg))
 
         return False
 
-
     def detect_drivers(self):
+        self.installdb = InstallDB()
+
         for child in self.listbox.get_children():
             child.destroy()
 
         pkgs = detection.detect_hardware_packages()
-        for pkg in pkgs:
-
-            GObject.idle_add(lambda: self.add_pkg(pkg))
+        GObject.idle_add(lambda: self.add_pkgs(pkgs))
 
         if len(pkgs) == 0:
             GObject.idle_add(lambda: self.rs.set_markup("<b>No drivers were found for your system</b>"))
