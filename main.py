@@ -41,8 +41,8 @@ class DoFlicky(Gtk.Window):
         layout.set_border_width(20)
         mlayout.pack_start(layout, True, True, 0)
 
-        self.set_icon_name("system-run-symbolic")
-        img = Gtk.Image.new_from_icon_name("system-run-symbolic", Gtk.IconSize.INVALID)
+        self.set_icon_name("cs-cat-hardware")
+        img = Gtk.Image.new_from_icon_name("cs-cat-hardware", Gtk.IconSize.INVALID)
         img.set_pixel_size(64)
         layout.pack_start(img, False, False, 0)
 
@@ -54,6 +54,7 @@ closed source code."""
 
         
         lab = Gtk.Label(text)
+        lab.set_margin_start(20)
         layout.pack_start(lab, True, True, 5)
 
         toolbar = Gtk.Toolbar()
@@ -79,7 +80,11 @@ closed source code."""
         mlayout.pack_end(toolbar, False, False, 0)
 
         listbox = Gtk.ListBox()
-        mlayout.pack_start(listbox, True, False, 3)
+        scl = Gtk.ScrolledWindow(None, None)
+        scl.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
+        scl.add(listbox)
+
+        mlayout.pack_end(scl, True, True, 0)
 
         # reserved widget
         self.rs = Gtk.Label("<b>Searching for available drivers</b>")
@@ -104,10 +109,22 @@ closed source code."""
         for pkg in pkgs:
             meta,files = pisi.api.info(pkg)
 
+            iconName = "video-display"
+            if meta.package.partOf != "xorg.driver":
+                iconName = "drive-removable-media"
+
+            img = Gtk.Image.new_from_icon_name(iconName, Gtk.IconSize.BUTTON)
+            img.set_margin_start(12)
+
+            box = Gtk.HBox(0)
+            box.pack_start(img, False, False, 0)
+
             lab = Gtk.Label("<big>%s</big> - <small>%s</small>" % (meta.package.summary, meta.package.version))
+            lab.set_margin_start(12)
             lab.set_use_markup(True)
-            lab.show_all()
-            self.listbox.add(lab)
+            box.pack_start(lab, False, True, 0)
+            box.show_all()
+            self.listbox.add(box)
 
             if self.installdb.has_package(pkg):
                 setattr(lab, "ipackage", self.installdb.get_package(pkg))
