@@ -12,6 +12,7 @@
 #
 from gi.repository import Gtk, GLib, Gdk, GObject, Gio
 from doflicky import detection
+from doflicky.ui import OpPage
 import pisi.api
 from threading import Thread
 from pisi.db.installdb import InstallDB
@@ -23,6 +24,8 @@ class DoFlickyWindow(Gtk.ApplicationWindow):
     installdb = None
     installbtn = None
     removebtn = None
+    stack = None
+    selection = None
 
     def __init__(self):
         Gtk.ApplicationWindow.__init__(self)
@@ -36,9 +39,12 @@ class DoFlickyWindow(Gtk.ApplicationWindow):
         hbar.set_subtitle("Solus Driver Management")
         self.set_size_request(400, 400)
 
+        self.stack = Gtk.Stack()
+        self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         mlayout = Gtk.VBox(0)
+        self.stack.add_named(mlayout, "main")
+        self.add(self.stack)
         self.layout = mlayout
-        self.add(mlayout)
 
         layout = Gtk.HBox(0)
         layout.set_border_width(20)
@@ -68,6 +74,7 @@ closed source code."""
         toolbar.add(sep)
 
         btn = Gtk.ToolButton.new(None, "Remove")
+        btn.connect('clicked', self.remove_package)
         self.removebtn = btn
         btn.set_sensitive(False)
         btn.set_property("icon-name", "list-remove-symbolic")
@@ -75,6 +82,7 @@ closed source code."""
         toolbar.add(btn)
 
         btn = Gtk.ToolButton.new(None, "Install")
+        btn.connect('clicked', self.install_package)
         self.installbtn = btn
         btn.set_sensitive(False)
         btn.set_property("icon-name", "list-add-symbolic")
@@ -102,6 +110,10 @@ closed source code."""
         self.listbox.connect("row-selected", self.row_handler)
 
         self.set_position(Gtk.WindowPosition.CENTER)
+
+        # update page..
+        page = OpPage()
+        self.stack.add_named(page, "operations")
         self.show_all()
 
 
@@ -110,10 +122,12 @@ closed source code."""
         if not row:
             self.installbtn.set_sensitive(False)
             self.removebtn.set_sensitive(False)
+            self.selection = None
             return
         child = row.get_child()
 
         installed = hasattr(child, 'ipackage')
+        self.selection = getattr(child, 'package')
         self.installbtn.set_sensitive(not installed)
         self.removebtn.set_sensitive(installed)
 
@@ -121,6 +135,14 @@ closed source code."""
         self.layout.set_sensitive(False)
         t = Thread(target=self.detect_drivers)
         t.start()
+
+    def install_package(self, udata=None):
+        print("[not] installing %s" % self.selection)
+        self.stack.set_visible_child_name("operations")
+
+    def remove_package(self, udata=None):
+        print("[not] removing %s" % self.selection)
+        self.stack.set_visible_child_name("operations")
 
     def add_pkgs(self, pkgs):
         for pkg in pkgs:
@@ -149,6 +171,7 @@ closed source code."""
             if hasPkg:
                 setattr(box, "ipackage", self.installdb.get_package(pkg))
                 lab.get_style_context().add_class("dim-label")
+            setattr(box, "package", pkg)
 
         self.layout.set_sensitive(True)
         return False
