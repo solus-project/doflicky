@@ -161,13 +161,11 @@ closed source code."""
         t.start()
 
     def install_package(self, udata=None):
-        print("[not] installing %s" % self.selection)
         self.op_page.install_package(self.package)
         self.stack.set_visible_child_name("operations")
         self.op_page.apply_operations()
 
     def remove_package(self, udata=None):
-        print("[not] removing %s" % self.selection)
         self.op_page.remove_package(self.package)
         self.stack.set_visible_child_name("operations")
         self.op_page.apply_operations()
