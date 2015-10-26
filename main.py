@@ -104,7 +104,8 @@ closed source code."""
         for pkg in pkgs:
             meta,files = pisi.api.info(pkg)
 
-            lab = Gtk.Label("%s - %s-%s" % (meta.package.name, meta.package.version, meta.package.release))
+            lab = Gtk.Label("<big>%s</big> - <small>%s</small>" % (meta.package.summary, meta.package.version))
+            lab.set_use_markup(True)
             lab.show_all()
             self.listbox.add(lab)
 
