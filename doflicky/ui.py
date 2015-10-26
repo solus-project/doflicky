@@ -11,6 +11,7 @@
 #  (at your option) any later version.
 #
 from gi.repository import Gtk, GLib, Gdk, GObject, Gio
+from doflicky.widgets import PackageLabel
 
 class OpPage(Gtk.VBox):
 
