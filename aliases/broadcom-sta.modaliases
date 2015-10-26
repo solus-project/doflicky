@@ -1,1 +1,1 @@
-alias pci:v*d*sv*sd*bc02sc80i* wl broadcom-sta
+alias pci:v000014E4d*sv*sd*bc02sc80i* wl broadcom-sta
