@@ -18,6 +18,45 @@ from glob import glob
 
 sys_dir = "/sys"
 
+MODDIR = "/usr/share/doflicky/modaliases"
+
+def detect_hardware_packages():
+    if not os.path.exists(MODDIR):
+        print("Moddir not found: %s" % MODDIR)
+        sys.exit(1)
+
+    pkgs = dict()
+    ret = list()
+
+    for item in os.listdir(MODDIR):
+        if not item.endswith(".modaliases"):
+            continue
+        with open(os.path.join(MODDIR, item), "r") as inp:
+            for line in inp.readlines():
+                line = line.replace("\r","").replace("\n","").strip()
+                splits = line.split()
+                if len(splits) != 4:
+                    continue
+                if splits[0] != "alias":
+                    continue
+                id = splits[1]
+                pkg = splits[3]
+                if pkg not in pkgs:
+                    pkgs[pkg] = list()
+                pkgs[pkg].append(HardwareID("modalias", id))
+
+    aliases = get_modaliases()
+    # testing
+    #aliases.add(HardwareID("modalias", "pci:v000010DEd00001241sv*sd*bc03sc*i*"))
+    for alias in aliases:
+        for pkg in pkgs:
+            if alias in pkgs[pkg]:
+                if pkg not in ret:
+                    ret.append(pkg)
+                    break
+
+    return ret
+
 ''' Return a 3 part tuple with information on the graphics card '''
 def get_glx_info():
 	p = subprocess.Popen(['glxinfo'], stdout=subprocess.PIPE,
