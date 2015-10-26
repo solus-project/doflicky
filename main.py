@@ -12,11 +12,14 @@
 #
 from gi.repository import Gtk, GLib, Gdk, GObject, Gio
 from doflicky import detection
-from doflicky.ui import OpPage
+from doflicky.ui import OpPage, CompletionPage
 import pisi.api
 from threading import Thread
 from pisi.db.installdb import InstallDB
+from pisi.db.packagedb import PackageDB
 import sys
+import dbus.mainloop.glib
+
 
 class DoFlickyWindow(Gtk.ApplicationWindow):
 
@@ -26,10 +29,13 @@ class DoFlickyWindow(Gtk.ApplicationWindow):
     removebtn = None
     stack = None
     selection = None
+    op_page = None
+    package = None
 
     def __init__(self):
         Gtk.ApplicationWindow.__init__(self)
 
+        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
         hbar = Gtk.HeaderBar()
         hbar.set_show_close_button(True)
         self.set_titlebar(hbar)
@@ -113,9 +119,22 @@ closed source code."""
 
         # update page..
         page = OpPage()
+        self.op_page = page
+        self.op_page.connect('complete', self.finished_handler)
+        self.op_page.connect('cancelled', self.cancelled_handler)
         self.stack.add_named(page, "operations")
         self.show_all()
 
+        self.cpage = CompletionPage()
+        self.stack.add_named(self.cpage, "complete")
+
+    def finished_handler(self, page, udata=None):
+        if self.stack.get_visible_child_name() != "complete":
+            self.stack.set_visible_child_name("complete")
+    def cancelled_handler(self, page, udata=None):
+        self.cpage.set_cancelled(True)
+        if self.stack.get_visible_child_name() != "complete":
+            self.stack.set_visible_child_name("complete")
 
     def row_handler(self, box, row):
         """ Ensure we only enable the correct buttons """
@@ -127,7 +146,8 @@ closed source code."""
         child = row.get_child()
 
         installed = hasattr(child, 'ipackage')
-        self.selection = getattr(child, 'package')
+        self.selection = getattr(child, 'packagen')
+        self.package = getattr(child, 'package')
         self.installbtn.set_sensitive(not installed)
         self.removebtn.set_sensitive(installed)
 
@@ -138,11 +158,15 @@ closed source code."""
 
     def install_package(self, udata=None):
         print("[not] installing %s" % self.selection)
+        self.op_page.install_package(self.package)
         self.stack.set_visible_child_name("operations")
+        self.op_page.apply_operations()
 
     def remove_package(self, udata=None):
         print("[not] removing %s" % self.selection)
+        self.op_page.remove_package(self.package)
         self.stack.set_visible_child_name("operations")
+        self.op_page.apply_operations()
 
     def add_pkgs(self, pkgs):
         for pkg in pkgs:
@@ -171,13 +195,15 @@ closed source code."""
             if hasPkg:
                 setattr(box, "ipackage", self.installdb.get_package(pkg))
                 lab.get_style_context().add_class("dim-label")
-            setattr(box, "package", pkg)
+            setattr(box, "package", self.packagedb.get_package(pkg))
+            setattr(box, "packagen", pkg)
 
         self.layout.set_sensitive(True)
         return False
 
     def detect_drivers(self):
         self.installdb = InstallDB()
+        self.packagedb = PackageDB()
 
         for child in self.listbox.get_children():
             child.destroy()
