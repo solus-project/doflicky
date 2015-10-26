@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 #
 #  main.py
@@ -9,21 +9,83 @@
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
-#  
+#
+from gi.repository import Gtk
 
-import sys
-from doflicky import detection
-import pisi.api
+class DoFlicky(Gtk.Window):
 
-def main():
-    pkgs = detection.detect_hardware_packages()
-    if len(pkgs) == 0:
-        print("No hardware support discovered")
-        sys.exit(1)
-    print("Discovered package(s): %s" % ", ".join(pkgs))
-    for pkg in pkgs:
-        meta,files = pisi.api.info(pkg)
-        print "%s - %s-%s" % (meta.package.name, meta.package.version, meta.package.release)
+    listbox = None
+
+    def __init__(self):
+        Gtk.Window.__init__(self)
+        self.connect('destroy', Gtk.main_quit)
+
+        hbar = Gtk.HeaderBar()
+        hbar.set_show_close_button(True)
+        self.set_titlebar(hbar)
+
+        self.set_title("DoFlicky")
+        hbar.set_title("DoFlicky")
+        hbar.set_subtitle("Solus Driver Management")
+        self.set_size_request(400, 400)
+
+        mlayout = Gtk.VBox(0)
+        self.add(mlayout)
+
+        layout = Gtk.HBox(0)
+        layout.set_border_width(20)
+        mlayout.pack_start(layout, True, True, 0)
+
+        self.set_icon_name("system-run-symbolic")
+        img = Gtk.Image.new_from_icon_name("system-run-symbolic", Gtk.IconSize.INVALID)
+        img.set_pixel_size(64)
+        layout.pack_start(img, False, False, 0)
+
+        text = """
+In some cases you may gain improved performance or
+features from the manufacturer's proprietary drivers.
+Note that the Solus Project developers cannot audit this
+closed source code."""
+
+        
+        lab = Gtk.Label(text)
+        layout.pack_start(lab, True, True, 5)
+
+        toolbar = Gtk.Toolbar()
+
+        sep = Gtk.SeparatorToolItem()
+        sep.set_expand(True)
+        sep.set_draw(False)
+        toolbar.add(sep)
+
+        btn = Gtk.ToolButton.new(None, "Remove")
+        btn.set_sensitive(False)
+        btn.set_property("icon-name", "list-remove-symbolic")
+        btn.set_is_important(True)
+        toolbar.add(btn)
+
+        btn = Gtk.ToolButton.new(None, "Install")
+        btn.set_property("icon-name", "list-add-symbolic")
+        btn.set_is_important(True)
+        toolbar.add(btn)
+
+        toolbar.get_style_context().add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
+        mlayout.pack_end(toolbar, False, False, 0)
+
+        listbox = Gtk.ListBox()
+        mlayout.pack_start(listbox, True, False, 3)
+
+        # reserved widget
+        rs = Gtk.Label("<b>No drivers were found for your system</b>")
+        rs.show_all()
+        rs.set_use_markup(True)
+
+        listbox.set_placeholder(rs)
+
+        self.listbox = listbox
+
+        self.show_all()
 
 if __name__ == "__main__":
-    main()
+    DoFlicky()
+    Gtk.main()
