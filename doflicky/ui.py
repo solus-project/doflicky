@@ -141,8 +141,11 @@ class OpPage(Gtk.VBox):
         self.operations[old_package.name] = 'UNINSTALL'
         self.update_ui()
 
-    def install_package(self, new_package):
+    def install_package(self, new_package, emul32=False):
         self.operations[new_package.name] = 'INSTALL'
+        emul32_name = new_package.name + "-32bit"
+        if emul32:
+            self.operations[emul32_name] = 'INSTALL'
         self.update_ui()
 
     def update_package(self, old_package, new_package):

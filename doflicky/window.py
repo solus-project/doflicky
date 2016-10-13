@@ -31,6 +31,7 @@ class DoFlickyWindow(Gtk.ApplicationWindow):
     selection = None
     op_page = None
     package = None
+    check_vga_emul32 = None
 
     def __init__(self):
         Gtk.ApplicationWindow.__init__(self)
@@ -72,6 +73,13 @@ closed source code."""
         lab = Gtk.Label(text)
         lab.set_margin_start(20)
         layout.pack_start(lab, True, True, 5)
+
+        # Allow installing 32-bit drivers..
+        lb = "Also install 32-bit driver (Required for Steam & Wine)"
+        self.check_vga_emul32 = Gtk.CheckButton.new_with_label(lb)
+        self.check_vga_emul32.set_halign(Gtk.Align.END)
+        mlayout.pack_start(self.check_vga_emul32, False, False, 0)
+        self.check_vga_emul32.set_no_show_all(True)
 
         toolbar = Gtk.Toolbar()
 
@@ -145,12 +153,19 @@ closed source code."""
             self.installbtn.set_sensitive(False)
             self.removebtn.set_sensitive(False)
             self.selection = None
+            self.check_vga_emul32.hide()
             return
         child = row.get_child()
 
         installed = hasattr(child, 'ipackage')
         self.selection = getattr(child, 'packagen')
         self.package = getattr(child, 'package')
+        # Update emul32 switch based on type of package
+        if self.package.partOf != "xorg.driver":
+            self.check_vga_emul32.hide()
+            print self.package.partOf
+        else:
+            self.check_vga_emul32.show()
         self.installbtn.set_sensitive(not installed)
         self.removebtn.set_sensitive(installed)
 
@@ -160,7 +175,12 @@ closed source code."""
         t.start()
 
     def install_package(self, udata=None):
-        self.op_page.install_package(self.package)
+        emul32 = False
+        if self.check_vga_emul32.get_visible():
+            if self.check_vga_emul32.get_active():
+                emul32 = True
+
+        self.op_page.install_package(self.package, emul32=emul32)
         self.stack.set_visible_child_name("operations")
         self.op_page.apply_operations()
 
@@ -170,6 +190,14 @@ closed source code."""
         self.op_page.apply_operations()
 
     def add_pkgs(self, pkgs):
+        # If wine-32bit or steam is installed, pre-select 32-bit drivers
+        do_emul32 = False
+        if self.installdb.has_package("steam"):
+            do_emul32 = True
+        elif self.installdb.has_package("wine-32bit"):
+            do_emul32 = True
+        self.check_vga_emul32.set_active(do_emul32)
+
         for pkg in pkgs:
             meta, files = pisi.api.info(pkg)
 
