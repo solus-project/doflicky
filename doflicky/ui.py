@@ -233,18 +233,18 @@ class OpPage(Gtk.VBox):
         self.emit('basket-changed', None)
 
     def show_dialog(self, pkgs, remove=False, update=False, install=True):
-        markup = "<big>The following packages need to be installed to continue</big>"
+        markup = "<big>{}</big>".format(
+            "The following dependencies need to be installed to continue")
 
-        dlg = Gtk.MessageDialog(self.get_toplevel(), Gtk.DialogFlags.MODAL | Gtk.DialogFlags.USE_HEADER_BAR,
-            Gtk.MessageType.QUESTION, Gtk.ButtonsType.OK_CANCEL)
-            
         dlg = Gtk.Dialog(use_header_bar=1)
         dlg.set_title("Installation confirmation")
         if remove:
-            markup = "<big>The following packages need to be removed to continue</big>"
+            markup = "<big>The following dependencies need to be removed to " \
+                     "continue</big>"
             dlg.set_title("Removal confirmation")
         elif update:
-            markup = "<big>The following packages need to be updated to continue</big>"
+            markup = "<big>The following dependencies need to be updated to " \
+                     "continue</big>"
             dlg.set_title("Update confirmation")
 
         lab = Gtk.Label(markup)
@@ -255,13 +255,13 @@ class OpPage(Gtk.VBox):
         dlg.get_content_area().pack_start(box, False, False, 0)
         dlg.get_content_area().set_border_width(5)
         dlg.get_action_area().set_border_width(5)
-        
+
         scroll = Gtk.ScrolledWindow(None, None)
         lbox = Gtk.ListBox()
         scroll.add(lbox)
         scroll.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
         scroll.set_property("margin", 5)
-        
+
         for pkg in pkgs:
             if remove:
                 package = self.installdb.get_package(pkg)
@@ -274,7 +274,8 @@ class OpPage(Gtk.VBox):
 
         btn = dlg.add_button("Cancel", Gtk.ResponseType.CANCEL)
         if not remove:
-            btn = dlg.add_button("Install" if install else "Update", Gtk.ResponseType.OK)
+            btn = dlg.add_button("Install" if install else "Update",
+                                 Gtk.ResponseType.OK)
             btn.get_style_context().add_class("suggested-action")
         else:
             btn = dlg.add_button("Remove", Gtk.ResponseType.OK)
@@ -287,60 +288,73 @@ class OpPage(Gtk.VBox):
         return False
 
     def apply_operations(self):
-        updates = [i for i in self.operations if self.operations[i] == 'UPDATE']
-        installs = [i for i in self.operations if self.operations[i] == 'INSTALL']
-        removals = [i for i in self.operations if self.operations[i] == 'UNINSTALL']
+        self.doing_things = True
+        updates = [
+            i for i in self.operations if self.operations[i] == 'UPDATE'
+        ]
+        installs = [
+            i for i in self.operations if self.operations[i] == 'INSTALL'
+        ]
+        removals = [
+            i for i in self.operations if self.operations[i] == 'UNINSTALL'
+        ]
 
-        STEPS = 4 # We monitor 4 post events
+        # We monitor 4 post events
+        STEPS = 4
 
         self.installdb = pisi.db.installdb.InstallDB()
         self.packagedb = pisi.db.packagedb.PackageDB()
 
         self.emit('apply', None)
-        #print "%d packages updated" % len(updates)
-        #print "%d packages installed" % len(installs)
-        #print "%d packages removed" % len(removals)
-        
+        # print "%d packages updated" % len(updates)
+        # print "%d packages installed" % len(installs)
+        # print "%d packages removed" % len(removals)
+
         setAct = False
 
         for packageset in [updates, installs, removals]:
             if len(packageset) == 0:
                 continue
-                
+
             self.current_package = 1
             self.current_dl_package = 1
-            
+
             if packageset == installs:
-                (pg,pkgs) = plan_install_pkg_names(packageset)
+                (pg, pkgs) = plan_install_pkg_names(packageset)
                 if len(pkgs) > len(packageset):
-                    if self.show_dialog(pkgs):
+                    p = [x for x in pkgs if x not in packageset]
+                    if self.show_dialog(p):
                         installs = packageset = pkgs
                     else:
-                        #print "Not installing"
+                        # print "Not installing"
                         continue
             elif packageset == removals:
-                (pk,pkgs) = plan_remove(packageset)
+                (pk, pkgs) = plan_remove(packageset)
                 if len(pkgs) > len(packageset):
-                    if self.show_dialog(pkgs, remove=True):
+                    p = [x for x in pkgs if x not in packageset]
+                    if self.show_dialog(p, remove=True):
                         removals = packageset = pkgs
                     else:
-                        #print "Not removing"
+                        # print "Not removing"
                         continue
-            elif packageset == removals:
-                (pk,pkgs) = plan_upgrade(packageset)
+            elif packageset == updates:
+                (pk, pkgs) = plan_upgrade(packageset)
                 if len(pkgs) > len(packageset):
-                    if self.show_dialog(pkgs, update=True):
+                    p = [x for x in pkgs if x not in packageset]
+                    if self.show_dialog(p, update=True):
                         updates = packageset = pkgs
                     else:
-                        #print "Not updating"
+                        # print Not continuing
                         continue
             self.total_packages = len(packageset)
             setAct = True
 
             if packageset != removals:
                 self.total_size = self.get_sizes(packageset)
-                self.step_offset = self.total_size / 10 # one tenth of progress is post install
-                self.progress_total = self.total_size + ((self.step_offset * self.total_packages) * STEPS)
+                # one tenth of progress is post install
+                self.step_offset = self.total_size / 10
+                self.progress_total = self.total_size + \
+                    ((self.step_offset * self.total_packages) * STEPS)
             else:
                 self.total_size = self.total_packages * (STEPS / 2)
                 self.step_offset = 1
@@ -351,11 +365,14 @@ class OpPage(Gtk.VBox):
 
             self.cb = self.invalidate_all
             if packageset == updates:
-                self.pmanager.updatePackage(",".join(packageset), async=self.pisi_callback)
+                self.pmanager.updatePackage(
+                    ",".join(packageset), async=self.pisi_callback)
             elif packageset == installs:
-                self.pmanager.installPackage(",".join(packageset), async=self.pisi_callback)
+                self.pmanager.installPackage(
+                    ",".join(packageset), async=self.pisi_callback)
             elif packageset == removals:
-                self.pmanager.removePackage(",".join(packageset), async=self.pisi_callback)
+                self.pmanager.removePackage(
+                    ",".join(packageset), async=self.pisi_callback)
         if not setAct:
             self.invalidate_all()
             self.update_ui()
