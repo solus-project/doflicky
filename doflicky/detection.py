@@ -2,23 +2,28 @@
 # -*- coding: utf-8 -*-
 #
 #  detection.py
-#  
-#  Copyright 2015 Ikey Doherty <ikey@solus-project.com>
-#  
+#
+#  Copyright 2015-2016 Ikey Doherty <ikey@solus-project.com>
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  Note: Some portions are copyright of Canonical, with code originally
 #  taken from Jockey
 
-import os, os.path, subprocess, sys, logging, re
+import os
+import subprocess
+import sys
+import logging
+import re
 from glob import glob
 
 sys_dir = "/sys"
 
 MODDIR = "/usr/share/doflicky/modaliases"
+
 
 def detect_hardware_packages():
     if not os.path.exists(MODDIR):
@@ -33,7 +38,7 @@ def detect_hardware_packages():
             continue
         with open(os.path.join(MODDIR, item), "r") as inp:
             for line in inp.readlines():
-                line = line.replace("\r","").replace("\n","").strip()
+                line = line.replace("\r", "").replace("\n", "").strip()
                 splits = line.split()
                 if len(splits) != 4:
                     continue
@@ -47,7 +52,8 @@ def detect_hardware_packages():
 
     aliases = get_modaliases()
     # testing
-    #aliases.add(HardwareID("modalias", "pci:v000010DEd00001241sv*sd*bc03sc*i*"))
+    # aliases.add(HardwareID("modalias",
+    #                        "pci:v000010DEd00001241sv*sd*bc03sc*i*"))
     for alias in aliases:
         for pkg in pkgs:
             if alias in pkgs[pkg]:
@@ -57,54 +63,9 @@ def detect_hardware_packages():
 
     return ret
 
-''' Return a 3 part tuple with information on the graphics card '''
-def get_glx_info():
-	p = subprocess.Popen(['glxinfo'], stdout=subprocess.PIPE,
-	    stderr=subprocess.PIPE, close_fds=True)
-	output = p.communicate()[0]
-
-	renderer = "UNKNOWN"
-	vendor = "UNKNOWN"
-	version = "UNKNOWN"
-
-	for line in output.split("\n"):
-		if "OpenGL" in line and ":" in line:
-
-			bitWeWant = line.split(":")[1].strip()
-			if "vendor" in line:
-				vendor = bitWeWant
-			elif "renderer" in line:
-				renderer = bitWeWant
-			elif "version string" in line and not "language" in line: # block CG compiler
-				version = bitWeWant
-
-	return (vendor,renderer,version)
-
-''' Return the name of the driver in /etc/X11/xorg.conf, or None '''
-def get_configured_driver():
-	if not os.path.exists("/etc/X11/xorg.conf"):
-		return None
-
-	with open("/etc/X11/xorg.conf","r") as x_file:
-
-		inSection = False
-		for line in x_file.readlines():
-
-			line = line.replace("\r","").replace("\n","").strip()
-
-			if not inSection and "Section" in line and "\"Device\"" in line:
-				inSection = True
-			if "EndSection" in line:
-				inSection = False
-			if  "Driver" in line and inSection:
-
-				driver = line.strip().split()[1].replace("\"","")
-				return driver
-
-	return None
 
 def get_modaliases():
-    '''Return a set of modalias HardwareIDs for available hardware.'''
+    """ Return a set of modalias HardwareIDs for available hardware. """
 
     if get_modaliases.cache:
         return get_modaliases.cache
@@ -129,7 +90,7 @@ def get_modaliases():
             continue
 
         # ignore drivers which are statically built into the kernel
-        driverlink =  os.path.join(path, 'driver')
+        driverlink = os.path.join(path, 'driver')
         modlink = os.path.join(driverlink, 'module')
         if os.path.islink(driverlink) and not os.path.islink(modlink):
             continue
@@ -141,7 +102,6 @@ def get_modaliases():
 
 get_modaliases.cache = None
 
-#--------------------------------------------------------------------#
 
 class HardwareID:
     '''A piece of hardware is denoted by an identification type and value.
@@ -207,7 +167,7 @@ class HardwareID:
 
 def get_modinfo(module):
     '''Return information about a kernel module.
-    
+
     This is delivered as a dictionary; keys are property names (strings),
     values are lists of strings (some properties might have multiple
     values, such as multi-line description fields or multiple PCI
@@ -219,7 +179,8 @@ def get_modinfo(module):
         pass
 
     proc = subprocess.Popen(("/sbin/modinfo", module),
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     (stdout, stderr) = proc.communicate()
     if proc.returncode != 0:
         logging.warning('modinfo for module %s failed: %s' % (module, stderr))
@@ -237,6 +198,7 @@ def get_modinfo(module):
     return modinfo
 
 get_modinfo.cache = {}
+
 
 def get_hardware():
     '''Return a set of HardwareID objects for the local hardware.'''
