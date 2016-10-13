@@ -80,6 +80,8 @@ closed source code."""
         self.check_vga_emul32.set_halign(Gtk.Align.END)
         mlayout.pack_start(self.check_vga_emul32, False, False, 0)
         self.check_vga_emul32.set_no_show_all(True)
+        self.check_vga_emul32.set_property("margin-top", 3)
+        self.check_vga_emul32.set_property("margin-bottom", 3)
 
         toolbar = Gtk.Toolbar()
 
