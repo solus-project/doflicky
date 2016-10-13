@@ -2,7 +2,7 @@
 Name=Hardware Drivers
 GenericName=Hardware Drivers
 Comment=Install or remove hardware drivers
-Exec=/usr/bin/doflicky
+Exec=/usr/bin/doflicky-ui
 Terminal=false
 Type=Application
 StartupNotify=false
