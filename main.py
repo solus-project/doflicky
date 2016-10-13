@@ -16,10 +16,10 @@ sys.path.append("/usr/share/doflicky")
 from gi.repository import Gtk, GLib, Gdk, GObject, Gio
 from doflicky import detection
 from doflicky.ui import OpPage, CompletionPage
-import pisi.api
 from threading import Thread
 from pisi.db.installdb import InstallDB
 from pisi.db.packagedb import PackageDB
+import pisi.api
 import sys
 import dbus.mainloop.glib
 
@@ -49,7 +49,8 @@ class DoFlickyWindow(Gtk.ApplicationWindow):
         self.set_size_request(400, 400)
 
         self.stack = Gtk.Stack()
-        self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+        self.stack.set_transition_type(
+            Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         mlayout = Gtk.VBox(0)
         self.stack.add_named(mlayout, "main")
         self.add(self.stack)
@@ -60,7 +61,8 @@ class DoFlickyWindow(Gtk.ApplicationWindow):
         mlayout.pack_start(layout, True, True, 0)
 
         self.set_icon_name("cs-cat-hardware")
-        img = Gtk.Image.new_from_icon_name("cs-cat-hardware", Gtk.IconSize.INVALID)
+        img = Gtk.Image.new_from_icon_name("cs-cat-hardware",
+                                           Gtk.IconSize.INVALID)
         img.set_pixel_size(64)
         layout.pack_start(img, False, False, 0)
 
@@ -70,7 +72,6 @@ features from the manufacturer's proprietary drivers.
 Note that the Solus Project developers cannot audit this
 closed source code."""
 
-        
         lab = Gtk.Label(text)
         lab.set_margin_start(20)
         layout.pack_start(lab, True, True, 5)
@@ -135,6 +136,7 @@ closed source code."""
     def finished_handler(self, page, udata=None):
         if self.stack.get_visible_child_name() != "complete":
             self.stack.set_visible_child_name("complete")
+
     def cancelled_handler(self, page, udata=None):
         self.cpage.set_cancelled(True)
         if self.stack.get_visible_child_name() != "complete":
@@ -172,7 +174,7 @@ closed source code."""
 
     def add_pkgs(self, pkgs):
         for pkg in pkgs:
-            meta,files = pisi.api.info(pkg)
+            meta, files = pisi.api.info(pkg)
 
             iconName = "video-display"
             if meta.package.partOf != "xorg.driver":
@@ -187,7 +189,8 @@ closed source code."""
             hasPkg = self.installdb.has_package(pkg)
             suffix = " [installed]" if hasPkg else ""
 
-            lab = Gtk.Label("<big>%s</big> - <small>%s%s</small>" % (meta.package.summary, meta.package.version, suffix))
+            lab = Gtk.Label("<big>{}</big> - <small>{}{}</small>".format(
+                meta.package.summary, meta.package.version, suffix))
             lab.set_margin_start(12)
             lab.set_use_markup(True)
             box.pack_start(lab, False, True, 0)
@@ -214,14 +217,19 @@ closed source code."""
         GObject.idle_add(lambda: self.add_pkgs(pkgs))
 
         if len(pkgs) == 0:
-            GObject.idle_add(lambda: self.rs.set_markup("<b>No drivers were found for your system</b>"))
+            d = "No drivers were found for your system"
+            GObject.idle_add(lambda: self.rs.set_markup("<b>{}</b>".format(d)))
+
 
 class DoFlicky(Gtk.Application):
+    """ Main entry into DoFlicky """
 
     app_win = None
 
     def __init__(self):
-        Gtk.Application.__init__(self, application_id="com.solus_project.DoFlicky", flags=Gio.ApplicationFlags.FLAGS_NONE)
+        Gtk.Application.__init__(self,
+                                 application_id="com.solus_project.DoFlicky",
+                                 flags=Gio.ApplicationFlags.FLAGS_NONE)
 
         self.connect('activate', self.on_activate)
 
@@ -234,6 +242,7 @@ class DoFlicky(Gtk.Application):
         self.app_win.present()
         self.app_win.show_all()
         self.app_win.refresh()
+
 
 if __name__ == "__main__":
     GLib.threads_init()
