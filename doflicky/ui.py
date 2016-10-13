@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  ui.py
-#  
-#  Copyright 2015 Ikey Doherty <ikey@solus-project.com>
-#  
+#
+#  Copyright 2015-2016 Ikey Doherty <ikey@solus-project.com>
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
@@ -19,6 +19,7 @@ from pisi.operations.install import plan_install_pkg_names
 from pisi.operations.remove import plan_remove
 from pisi.operations.upgrade import plan_upgrade
 import dbus
+
 
 class CompletionPage(Gtk.VBox):
 
@@ -44,33 +45,39 @@ class CompletionPage(Gtk.VBox):
         self.btn.set_visible(not c)
         self.btn.set_sensitive(not c)
         if c:
-            self.lab.set_markup("<big>User cancelled operation, please just close this window</big>")
+            self.lab.set_markup("<big>User cancelled operation, please just "
+                                "close this window</big>")
         else:
-            self.lab.set_markup("<big>Please restart your device to complete system configuration</big>")
+            self.lab.set_markup("<big>Please restart your device to complete "
+                                "system configuration</big>")
 
     def reboot(self, btn, udata=None):
         try:
             bus = dbus.SystemBus()
-            rskel = bus.get_object('org.freedesktop.login1', '/org/freedesktop/login1')
+            rskel = bus.get_object('org.freedesktop.login1',
+                                   '/org/freedesktop/login1')
             iface = dbus.Interface(rskel, 'org.freedesktop.login1.Manager')
             iface.Reboot(True)
         except Exception, ex:
             print("Exception rebooting: %s" % ex)
 
+
 class OpPage(Gtk.VBox):
 
     __gsignals__ = {
         'basket-changed': (GObject.SIGNAL_RUN_FIRST, None,
-                          (object,)),
+                           (object,)),
         'apply': (GObject.SIGNAL_RUN_FIRST, None,
-                          (object,)),
+                  (object,)),
         'complete': (GObject.SIGNAL_RUN_FIRST, None,
-                          (object,)),
+                     (object,)),
         'cancelled': (GObject.SIGNAL_RUN_FIRST, None,
-                          (object,))
+                      (object,))
     }
-    
-    def __init__(self, packagedb = pisi.db.packagedb.PackageDB, installdb = pisi.db.installdb.InstallDB()):
+
+    def __init__(self,
+                 packagedb=pisi.db.packagedb.PackageDB,
+                 installdb=pisi.db.installdb.InstallDB()):
         Gtk.VBox.__init__(self)
         self.set_valign(Gtk.Align.CENTER)
         self.set_border_width(20)
@@ -85,7 +92,7 @@ class OpPage(Gtk.VBox):
         self.pack_start(self.progress, False, False, 0)
 
         self.operations = dict()
-        
+
         self.update_ui()
 
         self.cb = None
@@ -103,16 +110,17 @@ class OpPage(Gtk.VBox):
             # Hide
             self.update_ui()
             return
-        #print "%s %f" % (label, fraction)
+        # print "%s %f" % (label, fraction)
         self.title.set_markup(label)
         self.progress.set_fraction(fraction)
-        
+
     def update_ui(self):
         count = self.operation_count()
         if count == 0:
             return
         if count > 1:
-            self.title.set_markup("%d operations pending" % self.operation_count())
+            self.title.set_markup("{} operations pending".format(
+                self.operation_count()))
         else:
             self.title.set_markup("One operation pending")
 
@@ -141,14 +149,14 @@ class OpPage(Gtk.VBox):
         self.operations[old_package.name] = 'UPDATE'
         self.update_ui()
 
-    def _get_prog(self, step):  
+    def _get_prog(self, step):
         self.progress_current = step
         total = float(self.progress_total)
         current = float(self.progress_current)
 
         fract = float(current/total)
         return fract
-        
+
     def pisi_callback(self, package, signal, args):
         if signal == 'status':
             cmd = args[0]
@@ -157,16 +165,21 @@ class OpPage(Gtk.VBox):
                 self.set_progress(1.0, "Updating %s repository" % what)
             elif cmd == 'extracting':
                 prog = self._get_prog(self.progress_current + self.step_offset)
-                self.set_progress(prog, "Extracting %d of %d: %s" % (self.current_package, self.total_packages, what))
+                msg = "Extracting {} of {}: {}".format(
+                    self.current_package, self.total_packages, what)
+                self.set_progress(prog, msg)
             elif cmd == 'configuring':
                 prog = self._get_prog(self.progress_current + self.step_offset)
-                self.set_progress(prog, "Configuring %d of %d: %s" % (self.current_package, self.total_packages, what))
+                msg = "Configuring {} of {}: {}".format(
+                    self.current_package, self.total_packages, what)
+                self.set_progress(prog, msg)
             elif cmd in ['removing', 'installing']:
                 prog = self._get_prog(self.progress_current + self.step_offset)
                 lab = "Installing %s: %s"
                 if cmd == 'removing':
                     lab = "Removing %s: %s"
-                count = "%d of %d" % (self.current_package, self.total_packages)
+                count = "{} of {}".format(
+                    self.current_package, self.total_packages)
                 self.set_progress(prog, lab % (count, what))
             elif cmd in ['upgraded', 'installed', 'removed']:
                 prog = self._get_prog(self.progress_current + self.step_offset)
@@ -176,7 +189,9 @@ class OpPage(Gtk.VBox):
                     lab = "Removed %s: %s"
                 elif cmd == 'installed':
                     lab = "Installed %s: %s"
-                count = "%d of %d" % (self.current_package, self.total_packages)
+                count = "{} of {}".format(
+                    self.current_package,
+                    self.total_packages)
                 self.set_progress(prog, lab % (count, what))
                 self.current_package += 1
 
@@ -186,35 +201,47 @@ class OpPage(Gtk.VBox):
                 if self.current_operations is not None:
                     # Doing real operations now.
                     package = args[1]
-                    whatisthis = args[2]
+                    # whatisthis = args[2]
                     speed_number = args[3]
                     speed_label = args[4]
                     downloaded = args[5]
                     download_size = args[6]
-                    down = downloaded
+                    # down = downloaded
                     speed = "%d %s" % (speed_number, speed_label)
 
                     diff = downloaded - download_size
                     inc = self.total_size + diff
                     prog = self._get_prog(inc)
 
-                    self.set_progress(prog, "Downloading %d of %d: %s (%s)" % (self.current_dl_package, self.total_packages, package, speed))
+                    cd = self.current_dl_package
+                    if cd == 0 and self.total_packages == 0:
+                        self.set_progress(prog, "Downloading {} ({})".format(
+                            package, speed))
+                    else:
+                        disp = "Downloading {} of {}: {} ({})"
+                        self.set_progress(prog, disp.format(
+                            self.current_dl_package,
+                            self.total_packages, package, speed))
 
                     if downloaded >= download_size:
                         self.current_dl_package += 1
                 else:
-                    #print args
+                    # print args
                     self.set_progress(1.0, "Downloading %s" % args[1])
-        elif signal == 'finished' or signal == None:
+        elif signal == 'finished' or signal is None:
             if self.cb is not None:
                 self.cb()
             self.cb = None
-            self.set_progress(None,None)
+            self.set_progress(None, None)
             self.update_ui()
-            self.emit('complete', None)
             return
-        elif str(signal).startswith("tr.org.pardus.comar.Comar.PolicyKit: tr.org.pardus.comar.system.manager"):
-            self.emit('cancelled', None)
+        elif str(signal).startswith("tr.org.pardus.comar.Comar.PolicyKit"):
+            if self.cb is not None:
+                self.cb()
+            self.cb = None
+            self.set_progress(None, None)
+            self.update_ui()
+            return
 
     def update_repo(self, cb=None):
         self.cb = cb
