@@ -163,7 +163,6 @@ closed source code."""
         # Update emul32 switch based on type of package
         if self.package.partOf != "xorg.driver":
             self.check_vga_emul32.hide()
-            print self.package.partOf
         else:
             self.check_vga_emul32.show()
         self.installbtn.set_sensitive(not installed)
