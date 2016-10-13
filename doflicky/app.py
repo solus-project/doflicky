@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  main.py
-#  
+#
 #  Copyright 2015 Ikey Doherty <ikey@solus-project.com>
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
@@ -14,6 +14,7 @@
 import sys
 from gi.repository import GLib, Gtk, Gdk, Gio
 from .window import DoFlickyWindow
+
 
 class DoFlicky(Gtk.Application):
     """ Main entry into DoFlicky """
@@ -36,6 +37,7 @@ class DoFlicky(Gtk.Application):
         self.app_win.present()
         self.app_win.show_all()
         self.app_win.refresh()
+
 
 def doflicky_main():
     GLib.threads_init()
