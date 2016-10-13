@@ -21,10 +21,7 @@
 #  MA 02110-1301, USA.
 #
 #
-import gi.repository
 from gi.repository import Gtk, GObject
-
-import pisi.api
 
 GENERIC = "package-x-generic"
 UPDATE_ICON = "package-upgrade"

@@ -10,7 +10,7 @@
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 #
-from gi.repository import Gtk, GLib, Gdk, GObject, Gio
+from gi.repository import Gtk, GObject
 from doflicky.widgets import PackageLabel
 
 import comar

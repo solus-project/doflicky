@@ -11,7 +11,7 @@
 #  (at your option) any later version.
 #
 
-from doflicky.app import DoFlicky, doflicky_main
+from doflicky.app import doflicky_main
 
 
 if __name__ == "__main__":

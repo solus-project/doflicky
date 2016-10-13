@@ -11,14 +11,13 @@
 #  (at your option) any later version.
 #
 
-from gi.repository import Gtk, GLib, Gdk, GObject, Gio
+from gi.repository import Gtk, GObject
 from doflicky import detection
 from doflicky.ui import OpPage, CompletionPage
 from threading import Thread
 from pisi.db.installdb import InstallDB
 from pisi.db.packagedb import PackageDB
 import pisi.api
-import sys
 import dbus.mainloop.glib
 
 

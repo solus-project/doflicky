@@ -18,7 +18,6 @@ import subprocess
 import sys
 import logging
 import re
-from glob import glob
 
 sys_dir = "/sys"
 
@@ -80,7 +79,6 @@ def get_modaliases():
         # devices on SSB bus only mention the modalias in the uevent file (as
         # of 2.6.24)
         elif 'ssb' in path and 'uevent' in files:
-            info = {}
             for l in open(os.path.join(path, 'uevent')):
                 if l.startswith('MODALIAS='):
                     modalias = l.split('=', 1)[1].strip()
