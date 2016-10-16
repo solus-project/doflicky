@@ -7,5 +7,5 @@ Terminal=false
 Type=Application
 StartupNotify=false
 Icon=cs-cat-hardware
-Categories=GTK;Settings;HardwareSettings;
+Categories=GTK;Settings;HardwareSettings;X-GNOME-Settings-Panel;
 Keywords=Driver;GPU;Hardware;Preferences;Install;Uninstall;Program;Software;App;Store;
