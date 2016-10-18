@@ -6,6 +6,6 @@ Exec=/usr/bin/doflicky-ui
 Terminal=false
 Type=Application
 StartupNotify=false
-Icon=cs-cat-hardware
+Icon=jockey
 Categories=GTK;Settings;HardwareSettings;X-GNOME-Settings-Panel;
 Keywords=Driver;GPU;Hardware;Preferences;Install;Uninstall;Program;Software;App;Store;

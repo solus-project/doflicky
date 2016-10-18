@@ -58,8 +58,8 @@ class DoFlickyWindow(Gtk.ApplicationWindow):
         layout.set_border_width(20)
         mlayout.pack_start(layout, True, True, 0)
 
-        self.set_icon_name("cs-cat-hardware")
-        img = Gtk.Image.new_from_icon_name("cs-cat-hardware",
+        self.set_icon_name("jockey")
+        img = Gtk.Image.new_from_icon_name("jockey",
                                            Gtk.IconSize.INVALID)
         img.set_pixel_size(64)
         layout.pack_start(img, False, False, 0)
