@@ -133,7 +133,7 @@ closed source code."""
         # update page..
         page = OpPage()
         self.op_page = page
-        self.op_page.connect('complete', self.finished_handler)
+        self.op_page.connect('basket-changed', self.finished_handler)
         self.op_page.connect('cancelled', self.cancelled_handler)
         self.stack.add_named(page, "operations")
         self.show_all()
