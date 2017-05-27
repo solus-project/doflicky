@@ -23,6 +23,10 @@ sys_dir = "/sys"
 
 MODDIR = "/usr/share/doflicky/modaliases"
 
+nvidia_driver_priority = ['nvidia-glx-driver',
+                          'nvidia-340-glx-driver',
+                          'nvidia-304-glx-driver']
+
 
 def detect_hardware_packages():
     if not os.path.exists(MODDIR):
@@ -58,7 +62,13 @@ def detect_hardware_packages():
             if alias in pkgs[pkg]:
                 if pkg not in ret:
                     ret.append(pkg)
-                    break
+
+    # Prioritize current over legacy version drivers if multiple possibilities
+    if len(ret) > 1:
+        for driver in nvidia_driver_priority:
+            if driver in ret:
+                ret = [driver]
+                break
 
     return ret
 
@@ -97,6 +107,7 @@ def get_modaliases():
 
     get_modaliases.cache = hw
     return hw
+
 
 get_modaliases.cache = None
 
@@ -195,6 +206,7 @@ def get_modinfo(module):
     get_modinfo.cache[module] = modinfo
     return modinfo
 
+
 get_modinfo.cache = {}
 
 
@@ -207,5 +219,6 @@ def get_hardware():
     # other hardware detection goes here
 
     return result
+
 
 (MODE_FREE, MODE_NONFREE, MODE_ANY) = range(3)
