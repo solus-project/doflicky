@@ -8,7 +8,7 @@ setup(
     description     = ("Solus Driver Manager"),
     license         = "GPL-2.0",
     url             = "https://github.com/solus-project/doflicky",
-    packages        = ['doflicky'],
+    packages        = ['doflicky', 'doflicky.driver'],
     scripts         = ['doflicky-ui'],
     classifiers     = [ "License :: OSI Approved :: GPL-2.0 License"],
     data_files      = [("/usr/share/applications", ["doflicky.desktop"]),
