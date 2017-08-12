@@ -20,16 +20,16 @@ class DriverBundleNvidia(DriverBundlePCI):
     def __init__(self):
         DriverBundlePCI.__init__(self, "nvidia-glx-driver.modaliases")
 
-    def get_name():
+    def get_name(self):
         return "NVIDIA Graphics Driver (main series)"
 
-    def get_icon():
+    def get_icon(self):
         return "video-display"
 
-    def has_emul32():
+    def has_emul32(self):
         return True
 
-    def get_packages(emul32=False):
+    def get_packages(self, emul32=False):
         # TODO: Return the right packages for the kernel!"
         basePackages = ["nvidia-glx-driver-common"]
         if emul32:
@@ -43,16 +43,16 @@ class DriverBundleNvidia304(DriverBundlePCI):
     def __init__(self):
         DriverBundlePCI.__init__(self, "nvidia-304-glx-driver.modaliases")
 
-    def get_name():
+    def get_name(self):
         return "NVIDIA Graphics Driver (304.xx series)"
 
-    def get_icon():
+    def get_icon(self):
         return "video-display"
 
-    def has_emul32():
+    def has_emul32(self):
         return True
 
-    def get_packages(emul32=False):
+    def get_packages(self, emul32=False):
         # TODO: Return the right packages for the kernel!"
         basePackages = ["nvidia-304-glx-driver-common"]
         if emul32:
@@ -66,16 +66,16 @@ class DriverBundleNvidia340(DriverBundlePCI):
     def __init__(self):
         DriverBundlePCI.__init__(self, "nvidia-340-glx-driver.modaliases")
 
-    def get_name():
+    def get_name(self):
         return "NVIDIA Graphics Driver (340.xx series)"
 
-    def get_icon():
+    def get_icon(self):
         return "video-display"
 
-    def has_emul32():
+    def has_emul32(self):
         return True
 
-    def get_packages(emul32=False):
+    def get_packages(self, emul32=False):
         # TODO: Return the right packages for the kernel!"
         basePackages = ["nvidia-340-glx-driver-common"]
         if emul32:

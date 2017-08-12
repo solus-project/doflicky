@@ -23,29 +23,29 @@ class DriverBundle:
     def __init__(self):
         pass
 
-    def has_emul32():
+    def has_emul32(self):
         """ By default most packages are native arch, and don't have a 32-bit
             equivalent. This differs for the NVIDIA drivers
         """
         return False
 
-    def get_packages(emul32=False):
+    def get_packages(self, emul32=False):
         """ Return the package set required for this bundle. The bundle should
             add more packages if emul32 has actually been requested, and it
             indeed supports emul32
         """
         return []
 
-    def get_name():
+    def get_name(self):
         """ Return the name for this driver bundle """
         return "Not implemented"
 
-    def get_icon():
+    def get_icon(self):
         """ Return a usable display icon name to be presented to the user in
             the UI listing if this hardware is present """
         return "image-missing"
 
-    def is_present():
+    def is_present(self):
         """ Allow the driver manager to know whether the hardware represented
             by the bundle is actually present or not.
         """
