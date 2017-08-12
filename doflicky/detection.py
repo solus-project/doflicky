@@ -21,6 +21,9 @@ import re
 
 from . import DriverBundle
 
+sys_dir = "/sys"
+MODDIR = "/usr/share/doflicky/modaliases"
+
 
 class DriverBundlePCI(DriverBundle):
     """ PCI driver bundles are modalias based implementations of DriverBundle
@@ -40,7 +43,7 @@ class DriverBundlePCI(DriverBundle):
         """ Load the modaliases path into a modalias table """
         self.modaliases = list()
 
-        with open(self.modaliasPath, "r") as inp:
+        with open(os.path.join(MODDIR, self.modaliasPath), "r") as inp:
             for line in inp.readlines():
                 line = line.replace("\r", "").replace("\n", "").strip()
                 splits = line.split()
@@ -63,8 +66,6 @@ class DriverBundlePCI(DriverBundle):
         return False
 
 
-sys_dir = "/sys"
-MODDIR = "/usr/share/doflicky/modaliases"
 nvidia_driver_priority = ['nvidia-glx-driver',
                           'nvidia-340-glx-driver',
                           'nvidia-304-glx-driver']
