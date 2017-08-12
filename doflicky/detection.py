@@ -28,6 +28,15 @@ nvidia_driver_priority = ['nvidia-glx-driver',
                           'nvidia-304-glx-driver']
 
 
+def detect_kernel_variant():
+    """ Attempt to figure out what kernel branch we're operating on """
+    try:
+        variant = os.uname()[2].split(".")[-1]
+    except:
+        variant = "lts"
+    return variant
+
+
 def detect_hardware_packages():
     if not os.path.exists(MODDIR):
         print("Moddir not found: %s" % MODDIR)
