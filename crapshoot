@@ -23,9 +23,9 @@ class BundleSet:
     def __init__(self):
         """ Initialise the potential driver bundle set """
         self.drivers = [
-            DriverBundleNvidia304(),
             DriverBundleNvidia340(),
             DriverBundleNvidia(),
+            DriverBundleNvidia304(),
         ]
         self.allDrivers = list()
         self.uniqueDrivers = list()
