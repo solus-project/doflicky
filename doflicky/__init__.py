@@ -36,6 +36,14 @@ class DriverBundle:
         """
         return []
 
+    def get_base(self):
+        """ Determine the base type of each driver, i.e. for conflicts """
+        return None
+
+    def get_priority(self):
+        """ Allow priority overrides when multiple same-class drivers match """
+        return 0
+
     def get_name(self):
         """ Return the name for this driver bundle """
         return "Not implemented"

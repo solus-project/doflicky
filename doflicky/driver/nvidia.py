@@ -29,34 +29,17 @@ class DriverBundleNvidia(DriverBundlePCI):
     def has_emul32(self):
         return True
 
+    def get_base(self):
+        return "nvidia-gpu"
+
+    def get_priority(self):
+        return 3
+
     def get_packages(self, emul32=False):
         # TODO: Return the right packages for the kernel!"
         basePackages = ["nvidia-glx-driver-common"]
         if emul32:
             basePackages.append("nvidia-glx-driver-32bit")
-        return basePackages
-
-
-class DriverBundleNvidia304(DriverBundlePCI):
-    """ NVIDIA driver 304 (nvidia-304-glx-driver) """
-
-    def __init__(self):
-        DriverBundlePCI.__init__(self, "nvidia-304-glx-driver.modaliases")
-
-    def get_name(self):
-        return "NVIDIA Graphics Driver (304.xx series)"
-
-    def get_icon(self):
-        return "video-display"
-
-    def has_emul32(self):
-        return True
-
-    def get_packages(self, emul32=False):
-        # TODO: Return the right packages for the kernel!"
-        basePackages = ["nvidia-304-glx-driver-common"]
-        if emul32:
-            basePackages.append("nvidia-304-glx-driver-32bit")
         return basePackages
 
 
@@ -75,9 +58,44 @@ class DriverBundleNvidia340(DriverBundlePCI):
     def has_emul32(self):
         return True
 
+    def get_base(self):
+        return "nvidia-gpu"
+
+    def get_priority(self):
+        return 2
+
     def get_packages(self, emul32=False):
         # TODO: Return the right packages for the kernel!"
         basePackages = ["nvidia-340-glx-driver-common"]
         if emul32:
             basePackages.append("nvidia-340-glx-driver-32bit")
+        return basePackages
+
+
+class DriverBundleNvidia304(DriverBundlePCI):
+    """ NVIDIA driver 304 (nvidia-304-glx-driver) """
+
+    def __init__(self):
+        DriverBundlePCI.__init__(self, "nvidia-304-glx-driver.modaliases")
+
+    def get_name(self):
+        return "NVIDIA Graphics Driver (304.xx series)"
+
+    def get_icon(self):
+        return "video-display"
+
+    def has_emul32(self):
+        return True
+
+    def get_base(self):
+        return "nvidia-gpu"
+
+    def get_priority(self):
+        return 1
+
+    def get_packages(self, emul32=False):
+        # TODO: Return the right packages for the kernel!"
+        basePackages = ["nvidia-304-glx-driver-common"]
+        if emul32:
+            basePackages.append("nvidia-304-glx-driver-32bit")
         return basePackages
