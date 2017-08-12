@@ -19,10 +19,52 @@ import sys
 import logging
 import re
 
+from . import DriverBundle
+
+
+class DriverBundlePCI(DriverBundle):
+    """ PCI driver bundles are modalias based implementations of DriverBundle
+        to make it easier to write subclasses
+    """
+
+    modaliasPath = None
+    modaliases = None
+
+    def __init__(self, modaliasPath):
+        DriverBundle.__init__(self)
+        if modaliasPath is None:
+            raise RuntimeError("modaliasPath must be set!")
+        self.modaliasPath = modaliasPath
+
+    def __load_modaliases(self):
+        """ Load the modaliases path into a modalias table """
+        self.modaliases = list()
+
+        with open(self.modaliasPath, "r") as inp:
+            for line in inp.readlines():
+                line = line.replace("\r", "").replace("\n", "").strip()
+                splits = line.split()
+                if len(splits) != 4:
+                    continue
+                if splits[0] != "alias":
+                    continue
+                id = splits[1]
+                self.modaliases.append(HardwareID("modalias", id))
+
+    def is_present(self):
+        """ Use the modalias system to determine if the hardware is present """
+        if self.modaliases is None:
+            self.__load_modaliases()
+
+        mods = get_modaliases()
+        for alias in mods:
+            if alias in self.modaliases:
+                return True
+        return False
+
+
 sys_dir = "/sys"
-
 MODDIR = "/usr/share/doflicky/modaliases"
-
 nvidia_driver_priority = ['nvidia-glx-driver',
                           'nvidia-340-glx-driver',
                           'nvidia-304-glx-driver']

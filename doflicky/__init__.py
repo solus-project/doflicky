@@ -20,6 +20,9 @@ class DriverBundle:
         that should be present for the hardware to correctly work
     """
 
+    def __init__(self):
+        pass
+
     def has_emul32():
         """ By default most packages are native arch, and don't have a 32-bit
             equivalent. This differs for the NVIDIA drivers
