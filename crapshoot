@@ -1,0 +1,27 @@
+#!/usr/bin/env python2.7
+#
+#  crapshoot - testing driver management
+#
+#  Copyright 2017 Ikey Doherty <ikey@solus-project.com>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+
+from doflicky.driver.nvidia import DriverBundleNvidia
+from doflicky.driver.nvidia import DriverBundleNvidia304
+from doflicky.driver.nvidia import DriverBundleNvidia340
+
+if __name__ == "__main__":
+    drivers = [
+        DriverBundleNvidia(),
+        DriverBundleNvidia304(),
+        DriverBundleNvidia340(),
+    ]
+    for driver in drivers:
+        if driver.is_present():
+            print("Found supported hardware: %s" % driver.get_name())
+            print("Packages: %s" % ", ".join(driver.get_packages(False)))
+            print("Packages+32: %s" % ", ".join(driver.get_packages(True)))
