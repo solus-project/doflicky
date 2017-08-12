@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
-#  This file is part of solus-sc
+#  This file is part of doflicky
 #
 #  Copyright © 2013-2017 Ikey Doherty <ikey@solus-project.com>
 #
