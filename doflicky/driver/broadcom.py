@@ -35,6 +35,7 @@ class DriverBundleBroadcom(DriverBundlePCI):
     def get_priority(self):
         return 1
 
-    def get_packages(self, emul32=False):
-        # TODO: Return the right packages for the kernel!"
+    def get_packages(self, context, emul32=False):
+        if context.get_active_kernel_series() == "current":
+            return ["broadcom-sta-current"]
         return ["broadcom-sta"]

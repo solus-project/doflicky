@@ -39,7 +39,7 @@ class OSContext:
         self._kernel_series = self._detect_kernel_variant()
         return self._kernel_series
 
-    def _detect_kernel_variant():
+    def _detect_kernel_variant(self):
         """ Attempt to figure out what kernel branch we're operating on """
         try:
             variant = os.uname()[2].split(".")[-1]
@@ -62,7 +62,7 @@ class DriverBundle:
         """
         return False
 
-    def get_packages(self, emul32=False):
+    def get_packages(self, context, emul32=False):
         """ Return the package set required for this bundle. The bundle should
             add more packages if emul32 has actually been requested, and it
             indeed supports emul32

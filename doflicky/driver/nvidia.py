@@ -46,11 +46,15 @@ class DriverBundleNvidia(DriverBundleNvidiaBase):
     def get_priority(self):
         return 3
 
-    def get_packages(self, emul32=False):
+    def get_packages(self, context, emul32=False):
         # TODO: Return the right packages for the kernel!"
         basePackages = ["nvidia-glx-driver-common"]
         if emul32:
             basePackages.append("nvidia-glx-driver-32bit")
+        if context.get_active_kernel_series() == "current":
+            basePackages.append("nvidia-glx-driver-current")
+        else:
+            basePackages.append("nvidia-glx-driver")
         return basePackages
 
 
@@ -67,11 +71,15 @@ class DriverBundleNvidia340(DriverBundleNvidiaBase):
     def get_priority(self):
         return 2
 
-    def get_packages(self, emul32=False):
+    def get_packages(self, context, emul32=False):
         # TODO: Return the right packages for the kernel!"
         basePackages = ["nvidia-340-glx-driver-common"]
         if emul32:
             basePackages.append("nvidia-340-glx-driver-32bit")
+        if context.get_active_kernel_series() == "current":
+            basePackages.append("nvidia-340-glx-driver-current")
+        else:
+            basePackages.append("nvidia-340-glx-driver")
         return basePackages
 
 
@@ -88,9 +96,13 @@ class DriverBundleNvidia304(DriverBundleNvidiaBase):
     def get_priority(self):
         return 1
 
-    def get_packages(self, emul32=False):
+    def get_packages(self, context, emul32=False):
         # TODO: Return the right packages for the kernel!"
         basePackages = ["nvidia-304-glx-driver-common"]
         if emul32:
             basePackages.append("nvidia-304-glx-driver-32bit")
+        if context.get_active_kernel_series() == "current":
+            basePackages.append("nvidia-304-glx-driver-current")
+        else:
+            basePackages.append("nvidia-304-glx-driver")
         return basePackages

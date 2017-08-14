@@ -10,6 +10,7 @@
 #  (at your option) any later version.
 #
 
+from doflicky import OSContext
 from doflicky.driver.nvidia import DriverBundleNvidia
 from doflicky.driver.nvidia import DriverBundleNvidia304
 from doflicky.driver.nvidia import DriverBundleNvidia340
@@ -24,6 +25,7 @@ class BundleSet:
     uniqueDrivers = None
     emul32Triggers = None
     db = None
+    context = None
 
     def __init__(self):
         """ Initialise the potential driver bundle set """
@@ -36,6 +38,7 @@ class BundleSet:
         self.allDrivers = list()
         self.uniqueDrivers = list()
         self.emul32Triggers = dict()
+        self.context = OSContext()
 
         self.db = InstallDB()
         for driver in self.drivers:
@@ -80,4 +83,5 @@ if __name__ == "__main__":
         emul32 = False
         if driver in bs.emul32Triggers:
             emul32 = True
-        print("Packages: %s" % ", ".join(driver.get_packages(emul32)))
+        pkgs = driver.get_packages(bs.context, emul32)
+        print("Packages: %s" % ", ".join(pkgs))
