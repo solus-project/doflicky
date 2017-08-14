@@ -15,6 +15,21 @@ import gi.repository
 gi.require_version('Gtk', '3.0')
 
 
+class OSContext:
+    """ OSContext simplifies the internals of managing kernels by keeping them
+        all stored/parsed in one place
+    """
+
+    def get_kernels():
+        """ get_kernels will be used in future to determine the active kernels
+            on the installation
+        """
+        raise RuntimeError("Not yet implemented")
+
+    def get_active_kernel_series():
+        raise RuntimeError("Not yet implemented")
+
+
 class DriverBundle:
     """ A driver bundle is the base type and corresponds to a set of packages
         that should be present for the hardware to correctly work
@@ -58,3 +73,7 @@ class DriverBundle:
             by the bundle is actually present or not.
         """
         return False
+
+    def triggers_emul32(self):
+        """ Return a list of package names that trigger emul32 selection """
+        return []

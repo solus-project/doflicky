@@ -14,14 +14,11 @@
 from doflicky.detection import DriverBundlePCI
 
 
-class DriverBundleNvidia(DriverBundlePCI):
-    """ Main NVIDIA driver (nvidia-glx-driver) """
+class DriverBundleNvidiaBase(DriverBundlePCI):
+    """ Ease of implementation, base class for nvidia drivers """
 
-    def __init__(self):
-        DriverBundlePCI.__init__(self, "nvidia-glx-driver.modaliases")
-
-    def get_name(self):
-        return "NVIDIA Graphics Driver (main series)"
+    def __init__(self, modaliasesPath):
+        DriverBundlePCI.__init__(self, modaliasesPath)
 
     def get_icon(self):
         return "video-display"
@@ -31,6 +28,20 @@ class DriverBundleNvidia(DriverBundlePCI):
 
     def get_base(self):
         return "nvidia-gpu"
+
+    def triggers_emul32(self):
+        """ For GPU drivers we'll suggest 32-bit when we find related pkgs """
+        return ["wine-32bit", "steam", "mesalib-32bit"]
+
+
+class DriverBundleNvidia(DriverBundleNvidiaBase):
+    """ Main NVIDIA driver (nvidia-glx-driver) """
+
+    def __init__(self):
+        DriverBundleNvidiaBase.__init__(self, "nvidia-glx-driver.modaliases")
+
+    def get_name(self):
+        return "NVIDIA Graphics Driver (main series)"
 
     def get_priority(self):
         return 3
@@ -43,23 +54,15 @@ class DriverBundleNvidia(DriverBundlePCI):
         return basePackages
 
 
-class DriverBundleNvidia340(DriverBundlePCI):
+class DriverBundleNvidia340(DriverBundleNvidiaBase):
     """ NVIDIA driver 340 (nvidia-340-glx-driver) """
 
     def __init__(self):
-        DriverBundlePCI.__init__(self, "nvidia-340-glx-driver.modaliases")
+        DriverBundleNvidiaBase.__init__(self,
+                                        "nvidia-340-glx-driver.modaliases")
 
     def get_name(self):
         return "NVIDIA Graphics Driver (340.xx series)"
-
-    def get_icon(self):
-        return "video-display"
-
-    def has_emul32(self):
-        return True
-
-    def get_base(self):
-        return "nvidia-gpu"
 
     def get_priority(self):
         return 2
@@ -72,23 +75,15 @@ class DriverBundleNvidia340(DriverBundlePCI):
         return basePackages
 
 
-class DriverBundleNvidia304(DriverBundlePCI):
+class DriverBundleNvidia304(DriverBundleNvidiaBase):
     """ NVIDIA driver 304 (nvidia-304-glx-driver) """
 
     def __init__(self):
-        DriverBundlePCI.__init__(self, "nvidia-304-glx-driver.modaliases")
+        DriverBundleNvidiaBase.__init__(self,
+                                        "nvidia-304-glx-driver.modaliases")
 
     def get_name(self):
         return "NVIDIA Graphics Driver (304.xx series)"
-
-    def get_icon(self):
-        return "video-display"
-
-    def has_emul32(self):
-        return True
-
-    def get_base(self):
-        return "nvidia-gpu"
 
     def get_priority(self):
         return 1

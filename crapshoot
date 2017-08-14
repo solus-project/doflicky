@@ -14,12 +14,16 @@ from doflicky.driver.nvidia import DriverBundleNvidia
 from doflicky.driver.nvidia import DriverBundleNvidia304
 from doflicky.driver.nvidia import DriverBundleNvidia340
 from doflicky.driver.broadcom import DriverBundleBroadcom
+import pisi
+from pisi.db.installdb import InstallDB
 
 class BundleSet:
 
     drivers = None
     allDrivers = None
     uniqueDrivers = None
+    emul32Triggers = None
+    db = None
 
     def __init__(self):
         """ Initialise the potential driver bundle set """
@@ -31,6 +35,13 @@ class BundleSet:
         ]
         self.allDrivers = list()
         self.uniqueDrivers = list()
+        self.emul32Triggers = dict()
+
+        self.db = InstallDB()
+        for driver in self.drivers:
+            for pkg in driver.triggers_emul32():
+                if self.db.has_package(pkg):
+                    self.emul32Triggers[driver] = True
 
     def detect(self):
         """ Perform main detection routine """
@@ -66,5 +77,7 @@ if __name__ == "__main__":
 
     for driver in bs.uniqueDrivers:
         print("Found supported hardware: %s" % driver.get_name())
-        print("Packages: %s" % ", ".join(driver.get_packages(False)))
-        print("Packages+32: %s" % ", ".join(driver.get_packages(True)))
+        emul32 = False
+        if driver in bs.emul32Triggers:
+            emul32 = True
+        print("Packages: %s" % ", ".join(driver.get_packages(emul32)))
