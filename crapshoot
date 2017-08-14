@@ -13,6 +13,7 @@
 from doflicky.driver.nvidia import DriverBundleNvidia
 from doflicky.driver.nvidia import DriverBundleNvidia304
 from doflicky.driver.nvidia import DriverBundleNvidia340
+from doflicky.driver.broadcom import DriverBundleBroadcom
 
 class BundleSet:
 
@@ -26,6 +27,7 @@ class BundleSet:
             DriverBundleNvidia340(),
             DriverBundleNvidia(),
             DriverBundleNvidia304(),
+            DriverBundleBroadcom(),
         ]
         self.allDrivers = list()
         self.uniqueDrivers = list()
