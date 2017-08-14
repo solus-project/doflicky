@@ -11,6 +11,9 @@
 #  (at your option) any later version.
 #
 
+import os
+
+
 import gi.repository
 gi.require_version('Gtk', '3.0')
 
@@ -20,14 +23,29 @@ class OSContext:
         all stored/parsed in one place
     """
 
-    def get_kernels():
+    _kernel_series = None
+
+    def get_kernels(self):
         """ get_kernels will be used in future to determine the active kernels
             on the installation
         """
         raise RuntimeError("Not yet implemented")
 
-    def get_active_kernel_series():
-        raise RuntimeError("Not yet implemented")
+    def get_active_kernel_series(self):
+        """ Determine the active (running) kernel series to tailor pkgs """
+        if self._kernel_series:
+            return self._kernel_series
+
+        self._kernel_series = self._detect_kernel_variant()
+        return self._kernel_series
+
+    def _detect_kernel_variant():
+        """ Attempt to figure out what kernel branch we're operating on """
+        try:
+            variant = os.uname()[2].split(".")[-1]
+        except:
+            variant = "lts"
+        return variant
 
 
 class DriverBundle:
