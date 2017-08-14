@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name            = "doflicky",
-    version         = "5",
+    version         = "6",
     author          = "Ikey Doherty",
     author_email    = "ikey@solus-project.com",
     description     = ("Solus Driver Manager"),
