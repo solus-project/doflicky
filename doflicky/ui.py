@@ -138,15 +138,23 @@ class OpPage(Gtk.VBox):
         self.update_ui()
 
     def remove_package(self, old_package):
-        self.operations[old_package.name] = 'UNINSTALL'
+        print("-REMOVE " + old_package)
+        self.operations[old_package] = 'UNINSTALL'
         self.update_ui()
 
-    def install_package(self, new_package, emul32=False):
-        self.operations[new_package.name] = 'INSTALL'
-        emul32_name = new_package.name + "-32bit"
-        if emul32:
-            self.operations[emul32_name] = 'INSTALL'
+    def remove_packages(self, packages):
+        for pkg in packages:
+            if self.installdb.has_package(pkg):
+                self.remove_package(pkg)
+
+    def install_package(self, new_package):
+        print("+INSTALL " + new_package)
+        self.operations[new_package] = 'INSTALL'
         self.update_ui()
+
+    def install_packages(self, packages):
+        for pkg in packages:
+            self.install_package(pkg)
 
     def update_package(self, old_package, new_package):
         self.operations[old_package.name] = 'UPDATE'

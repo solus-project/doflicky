@@ -17,8 +17,8 @@ from doflicky.ui import OpPage, CompletionPage
 from threading import Thread
 from pisi.db.installdb import InstallDB
 from pisi.db.packagedb import PackageDB
-import pisi.api
 import dbus.mainloop.glib
+from .bundleset import BundleSet
 
 
 class DoFlickyWindow(Gtk.ApplicationWindow):
@@ -28,10 +28,11 @@ class DoFlickyWindow(Gtk.ApplicationWindow):
     installbtn = None
     removebtn = None
     stack = None
-    selection = None
     op_page = None
     package = None
     check_vga_emul32 = None
+    bundleset = None
+    driver = None
 
     def __init__(self):
         Gtk.ApplicationWindow.__init__(self)
@@ -75,7 +76,7 @@ closed source code."""
         layout.pack_start(lab, True, True, 5)
 
         # Allow installing 32-bit drivers..
-        lb = "Also install 32-bit driver (Required for Steam & Wine)"
+        lb = "Also install 32-bit driver (Required for some games)"
         self.check_vga_emul32 = Gtk.CheckButton.new_with_label(lb)
         self.check_vga_emul32.set_halign(Gtk.Align.START)
         mlayout.pack_start(self.check_vga_emul32, False, False, 0)
@@ -155,19 +156,22 @@ closed source code."""
         if not row:
             self.installbtn.set_sensitive(False)
             self.removebtn.set_sensitive(False)
-            self.selection = None
+            self.driver = None
             self.check_vga_emul32.hide()
             return
         child = row.get_child()
 
-        installed = hasattr(child, 'ipackage')
-        self.selection = getattr(child, 'packagen')
-        self.package = getattr(child, 'package')
-        # Update emul32 switch based on type of package
-        if self.package.partOf != "xorg.driver":
-            self.check_vga_emul32.hide()
-        else:
-            self.check_vga_emul32.show()
+        self.driver = getattr(child, 'driver')
+        emul32 = self.driver.has_emul32()
+        self.check_vga_emul32.set_visible(emul32)
+
+        packages = self.driver.get_packages(self.bundleset.context, False)
+        installed = False
+        for pkg in packages:
+            if self.installdb.has_package(pkg):
+                installed = True
+                break
+
         self.installbtn.set_sensitive(not installed)
         self.removebtn.set_sensitive(installed)
 
@@ -177,35 +181,38 @@ closed source code."""
         t.start()
 
     def install_package(self, udata=None):
-        emul32 = False
+        e32 = False
         if self.check_vga_emul32.get_visible():
             if self.check_vga_emul32.get_active():
-                emul32 = True
+                e32 = True
 
-        self.op_page.install_package(self.package, emul32=emul32)
+        desiredPackages = self.driver.get_packages(self.bundleset.context, e32)
+        self.op_page.install_packages(desiredPackages)
         self.stack.set_visible_child_name("operations")
         self.op_page.apply_operations()
 
     def remove_package(self, udata=None):
-        self.op_page.remove_package(self.package)
+        packages = []
+        desiredPackages = self.driver.get_packages(self.bundleset.context,
+                                                   True)
+        for pkg in desiredPackages:
+            if self.installdb.has_package(pkg):
+                packages.append(pkg)
+
+        self.op_page.remove_packages(packages)
         self.stack.set_visible_child_name("operations")
         self.op_page.apply_operations()
 
-    def add_pkgs(self, pkgs):
-        # If wine-32bit or steam is installed, pre-select 32-bit drivers
-        do_emul32 = False
-        if self.installdb.has_package("steam"):
-            do_emul32 = True
-        elif self.installdb.has_package("wine-32bit"):
-            do_emul32 = True
-        self.check_vga_emul32.set_active(do_emul32)
+    def add_pkgs(self):
+        for driver in self.bundleset.uniqueDrivers:
+            iconName = driver.get_icon()
 
-        for pkg in pkgs:
-            meta, files = pisi.api.info(pkg)
-
-            iconName = "video-display"
-            if meta.package.partOf != "xorg.driver":
-                iconName = "drive-removable-media"
+            hasPkg = True
+            packages = driver.get_packages(self.bundleset.context, False)
+            for pkg in packages:
+                if not self.installdb.has_package(pkg):
+                    hasPkg = False
+                    break
 
             img = Gtk.Image.new_from_icon_name(iconName, Gtk.IconSize.BUTTON)
             img.set_margin_start(12)
@@ -213,11 +220,10 @@ closed source code."""
             box = Gtk.HBox(0)
             box.pack_start(img, False, False, 0)
 
-            hasPkg = self.installdb.has_package(pkg)
             suffix = " [installed]" if hasPkg else ""
 
-            lab = Gtk.Label("<big>{}</big> - <small>{}{}</small>".format(
-                meta.package.summary, meta.package.version, suffix))
+            lab = Gtk.Label("<big>{}</big> - <small>{}</small>".format(
+                driver.get_name(), suffix))
             lab.set_margin_start(12)
             lab.set_use_markup(True)
             box.pack_start(lab, False, True, 0)
@@ -225,10 +231,8 @@ closed source code."""
             self.listbox.add(box)
 
             if hasPkg:
-                setattr(box, "ipackage", self.installdb.get_package(pkg))
                 lab.get_style_context().add_class("dim-label")
-            setattr(box, "package", self.packagedb.get_package(pkg))
-            setattr(box, "packagen", pkg)
+            setattr(box, "driver", driver)
 
         self.layout.set_sensitive(True)
         return False
@@ -240,8 +244,11 @@ closed source code."""
         for child in self.listbox.get_children():
             child.destroy()
 
+        self.bundleset = BundleSet()
+        self.bundleset.detect()
+
         pkgs = detection.detect_hardware_packages()
-        GObject.idle_add(lambda: self.add_pkgs(pkgs))
+        GObject.idle_add(lambda: self.add_pkgs())
 
         if len(pkgs) == 0:
             d = "No drivers were found for your system"
