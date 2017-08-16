@@ -60,7 +60,7 @@ class BundleSet:
             otherDrivers = [x for x in self.uniqueDrivers if x.get_base() == b]
 
             for existing in otherDrivers:
-                if existing.get_priority() > driver:
+                if existing.get_priority() > driver.get_priority():
                     print("DEBUG: {} shadowed by existing {}".format(
                         driver.get_name(), existing.get_name()))
                     return
